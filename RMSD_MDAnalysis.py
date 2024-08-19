@@ -1,14 +1,20 @@
 #%%
+from weakref import ref
 import MDAnalysis as mda
 from MDAnalysis.analysis import rms
 from MDAnalysis.analysis import align
 import os
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 # Define the paths to the FASTA folder and the reference PDB directory
-fasta_dir = r"/mnt/c/Users/epicm/OneDrive/Desktop/Amyloid_Project/FASTA/alpha_synuclein_15aa_consecutive"
-ref_dir = r"/mnt/c/Users/epicm/OneDrive/Desktop/Amyloid_Project/PDBs/alpha_synuclein_unique_amyloids"
+fasta_dir = r"/PDBs/alpha_synuclein_15aa_consecutive_filtered"
+ref_dir = r"/PDBs/alpha_synuclein_unique_amyloids"
+output_dir = r"/aligned_structures"
+
+# Create the output directory if it doesn't exist
+os.makedirs(output_dir, exist_ok=True)
 segment_length = 15
 
 def find_chain_residues(pdb_path):
@@ -29,6 +35,9 @@ def find_chain_residues(pdb_path):
     return first_resid, last_resid
 
 def extract_range(filename):
+    '''
+    filename: str, the name of the pdb file
+    '''
     # Extract the ##-## part from the filename and return the first number
     numeric_part = filename.split('_')[2]
     start_num = int(numeric_part.split('-')[0])
@@ -59,8 +68,8 @@ column_names = ["PDB ID"] + [os.path.splitext(os.path.basename(path))[0] for pat
 # Set the column names
 df.columns = column_names
 # Set row names
-df["PDB ID"] = [f"{i}:{i+14}" for i in range(1, height + 1)]
-
+df["PDB ID"] = [f"{i}_{i+14}" for i in range(1, height + 1)]
+print(df)
 # Print the dictionary
 #print(pdb_file_dict)
 # Loop through each key in pdb_file_dict
@@ -74,7 +83,7 @@ df["PDB ID"] = [f"{i}:{i+14}" for i in range(1, height + 1)]
             # Store in df at row = i-1, column = key
 
 # Loop through each key in pdb_file_dict
-for key, ref_path in pdb_dict.items():
+for key, ref_path in tqdm(pdb_dict.items()):
 
     # Set ref universe as ref_path
     ref_universe = mda.Universe(ref_path)
@@ -90,29 +99,26 @@ for key, ref_path in pdb_dict.items():
         mobile_path = fasta_dict[i]  # Assuming fasta_dict is defined and contains paths
         mobile_universe = mda.Universe(mobile_path)
 
-        #select ref atoms from i to i+segment_length-1
-        ref_atoms = ref_universe.select_atoms(f"chainID A and resid {i}:{i + segment_length - 1}")
-        #select mobile atoms from 1:segment_length
-        mobile_atoms = mobile_universe.select_atoms(f"chainID A and resid 1:{segment_length}")
-        # Print ref_atoms vertically
-        print("Reference Atoms:")
-        for atom in ref_atoms:
-            print(atom)
+        # Define selection strings for mobile and reference universes
+        mobile_selection = f"chainID A and resid 1:{segment_length} and name N CA C CB"
+        ref_selection = f"chainID A and resid {i}:{i + segment_length - 1} and name N CA C CB"
 
-        # Print mobile_atoms vertically
-        print("Mobile Atoms:")
-        for atom in mobile_atoms:
-            print(atom)
+        # Assign selections to ref_atoms and mobile_atoms
+        ref_atoms = ref_universe.select_atoms(f"{ref_selection}")
+        mobile_atoms = mobile_universe.select_atoms(f"{mobile_selection}")
         
-        # Reindex ref_atoms to start from 1
+        # Perform alignment
+        align.alignto(mobile_universe, ref_universe, select=(mobile_selection, ref_selection))
 
+        # Save the aligned mobile structure
+        aligned_filename = f"{df.columns[key]}_{df.iloc[i-1,0]}_aligned.pdb"
+        aligned_path = os.path.join(output_dir, aligned_filename)
+        mobile_universe.atoms.write(aligned_path)
 
-        # Compute RMSD between mobile and ref
-        rmsd_value = rms.rmsd(mobile_atoms.positions, ref_atoms.positions, weights = "mass", center = True, superposition = True)
-        print(f"RMSD for segment starting at residue {i}:{rmsd_value}")
-
-        # Store RMSD in df at row = i-1, column = key
+        # Calculate RMSD
+        rmsd_value = rms.rmsd(mobile_atoms.positions, ref_atoms.positions, center=True, superposition=True)
         df.loc[i, key] = rmsd_value
+        
         
 #%%
     
