@@ -7,6 +7,7 @@ We are using Alphafold 2 and UCSB's scientific computing cluster POD to predict 
 ## Table of Contents
 
 - [About](#about)
+- [Installation](#installation)
 - [Usage](#usage)
 - [Scripts](#scripts)
 - [Results](#results)
@@ -15,7 +16,7 @@ We are using Alphafold 2 and UCSB's scientific computing cluster POD to predict 
 
 Amyloid proteins are a group of misfolded proteins that aggregate into insoluble fibrils. These fibrils are characterized by high densities beta-sheets that stack together, eventually forming amyloid plaques. When amyloid fibrils accumulate, they disrup normal tissue function, leading to diseases such as Alzheimers, ALS, Parkinsons, MSA, and other degenerative illnesses. Techniques such as cryogenic electron microscopy (cryo-EM) have allowed researchers to map out the structures of these misfolded proteins. This coding project seeks to determine which sequences of amino acids are most responsible for amyloid formation. Amino acid snippets between 13-19 residues long are folded into mock amyloid structures using Alphafold 2. These snippets are then analyzed for root mean square deviation (RMSD) from the CEM structures and their magnitude of intermolecular contacts. Amino acid snippets with low RMSD scores and high intermolecular contact scores are likely to for amyloid fibrils in solution. 
 
-## Usage
+## Installation
 
 To predict movel amino acid sequences likely to form amyloid fibrils the following prerequisites and installation steps are required:
 
@@ -26,7 +27,7 @@ To predict movel amino acid sequences likely to form amyloid fibrils the followi
 - Python MDAnalysis Library
 - Access to scientific computing cluster with Colabfold
 
-### Installation
+### Instructions
 
 Clone the repository and install the required packages
 
@@ -37,9 +38,12 @@ cd amyloid_search
 conda install -c conda-forge mdanalysis
 ```
 
-To execute code, the following scripts should be run in order. Prerequisites may be changed within scripts to adjust values such as segment_length and protein_name:
 
-## Scripts
+
+## Usage
+
+To execute code, the following scripts should be run in order. Prerequisites may be changed within scripts to adjust values such as segment_length and protein_name: 
+
 **make_fasta.py**: This script generates a fasta document with 5 snippets of fraglength spaced increment apart. They are formatted as (snippet)(10*U)...(10*U)(snippet). When these snippets 
 are simulated in Alphafold they will fold into amyloid shapes.  
 
