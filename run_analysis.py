@@ -13,16 +13,18 @@ import os
 # aligned_reindexed_dir = "/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/PDBs/aligned_reindexed_structures_13aa"  # Output directory for fix_resid_chainid
 # protein = "alpha-synuclein"
 # segment_length = 13
-num = 19
 # Define directories and common arguments
-alphafold_raw_output = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/PDBs/alpha_synuclein_fragments_{num}aa"  # Directory containing raw AlphaFold output
-alphafold_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/PDBs/alpha-synuclein_{num}aa_consecutive_filtered"
-ref_dir = "/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/PDBs/alpha-synuclein_unique_amyloids"
-csv_dir = "/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/CSVs"
-img_dir = "/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/IMGs"
-aligned_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/PDBs/aligned_structures_{num}aa"  # Output directory for Alignment_MDAnalysis
-aligned_reindexed_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/alpha-synuclein/PDBs/aligned_reindexed_structures_{num}aa"  # Output directory for fix_resid_chainid
-protein = "alpha-synuclein"
+protein = "FUS"
+num = 17  # Example value, adjust accordingly
+
+# Directories using formatted strings with the variable `protein`
+alphafold_raw_output = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/{protein}/PDBs/{protein}_fragments_{num}aa"
+alphafold_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/{protein}/PDBs/{protein}_{num}aa_consecutive_filtered"
+ref_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/{protein}/PDBs/{protein}_unique_amyloids"
+csv_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/{protein}/CSVs"
+img_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/{protein}/IMGs"
+aligned_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/{protein}/PDBs/aligned_structures_{num}aa"
+aligned_reindexed_dir = f"/mnt/c/Users/epicm/OneDrive/Desktop/amyloid_search/{protein}/PDBs/aligned_reindexed_structures_{num}aa"
 segment_length = num
 
 def run_script(script_name, args):
@@ -38,6 +40,11 @@ def run_script(script_name, args):
 run_script("get_rank_001.py", [
     "--alphafold_raw_output", alphafold_raw_output,
     "--output_dir", alphafold_dir
+])
+#%%
+# Run remove_altLoc.py to remove alterante locations in reference files
+run_script("remove_altLoc.py", [
+    "--input_dir", ref_dir
 ])
 
 #%%

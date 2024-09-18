@@ -1,2 +1,6 @@
-# Ignore all .PDB files
-*.PDB
+
+# Ignore all .pdb files
+*.pdb
+
+# Inore alphafold raw output folders
+**/*fragments_*aa/

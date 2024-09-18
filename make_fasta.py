@@ -4,10 +4,11 @@ import os
 # Create the ArgumentParser object
 parser = argparse.ArgumentParser(description="Process amino acid sequence, fragment length, protein name, and output directory.")
 
-# Add arguments for sequence, protein name, and output directory
+# Add arguments for sequence, protein name, output directory, and starting index
 parser.add_argument('--sequence', type=str, required=True, help='Amino acid sequence to be processed.')
 parser.add_argument('--protein_name', type=str, required=True, help='Name of the protein.')
 parser.add_argument('--output_dir', type=str, required=True, help='Directory where output files will be saved.')
+parser.add_argument('--start_index', type=int, required=False, default=1, help='Starting index label for the first fragment.')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -16,16 +17,16 @@ args = parser.parse_args()
 sequence = args.sequence
 protein_name = args.protein_name
 output_dir = args.output_dir
+start_index = args.start_index
 
-# Fragment lengths to be processed (only 13 and 15 now)
+# Fragment lengths to be processed (13, 15, and 17 for now)
 fragment_lengths = [13, 15, 17]
 
 # Ensure the output directory exists
 os.makedirs(output_dir, exist_ok=True)
 
 # Function to create fragments and write to a FASTA file
-def create_fasta(sequence, fraglength, protein_name, output_dir):
-    start = 1  # Start position for the first fragment
+def create_fasta(sequence, fraglength, protein_name, output_dir, start_index):
     increment = 1  # Step increment for creating new fragments
     length = len(sequence)
     fragments = []
@@ -40,8 +41,8 @@ def create_fasta(sequence, fraglength, protein_name, output_dir):
     # Create a FASTA file with fragments interspersed with 10 U's
     with open(output_file, 'w') as f:
         for i, frag in enumerate(fragments):
-            # Write the FASTA header
-            f.write(f'>{protein_name} {start + increment * i}-{start + increment * i + fraglength - 1}\n')
+            # Write the FASTA header with the custom start index
+            f.write(f'>{protein_name} {start_index + increment * i}-{start_index + increment * i + fraglength - 1}\n')
 
             n = 4  # Number of repetitions of the fragment with UUUUUUUUUU groups
             for _ in range(n):
@@ -54,5 +55,4 @@ def create_fasta(sequence, fraglength, protein_name, output_dir):
 
 # Loop through each fragment length and create a FASTA file
 for fraglength in fragment_lengths:
-    create_fasta(sequence, fraglength, protein_name, output_dir)
-
+    create_fasta(sequence, fraglength, protein_name, output_dir, start_index)
